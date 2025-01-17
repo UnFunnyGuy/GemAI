@@ -20,6 +20,7 @@ GemAI is an Android application that provides a simple chat interface using Goog
 * **Platform**: Android (API 30+)
 * **Language**: Kotlin (JDK 11)
 * **UI**: Jetpack Compose
+* **Navigation**: Compose Destination
 * **Dependencies**:
     * Room Database
     * DataStore
