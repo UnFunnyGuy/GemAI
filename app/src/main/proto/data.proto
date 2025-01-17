@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option java_package = "com.sarath.gem";
+option java_multiple_files = true;
+
+message UserConfig {
+  AIModel model = 1;
+  string apiKey = 2;
+  bool hasApiKey = 3;
+}
+
+
+enum AIModel {
+  GEMINI_2_0_FLASH_EXP = 0;
+  GEMINI_1_5_FLASH = 1;
+  GEMINI_1_5_PRO = 2;
+}
