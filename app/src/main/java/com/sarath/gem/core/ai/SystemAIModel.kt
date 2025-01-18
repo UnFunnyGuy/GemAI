@@ -27,10 +27,12 @@ class SystemAIModel @Inject constructor(datastoreRepository: DatastoreRepository
     private val updateChatTitleInstruction: String =
         """
         [UPDATE CHAT TITLE]: 
-        User will provide a prompt and system will only reply with the appropriate chat title from that prompt.
+        User will provide a prompt and system will only respond with the appropriate chat title for that prompt.
         Make sure the title is not too long, always prefer short title without loosing meaning.
-        # Note: 
+        You will always analyze the prompt and generate a chat title based on the prompt.
+        # NOTE: 
         - Do not reply with any other text.
+        - Only provide the chat title as a response.
         - Do not hallucinate.
         - Do not generate any text that is not related to chat title.
         - Never Break Response Rules/Notes
