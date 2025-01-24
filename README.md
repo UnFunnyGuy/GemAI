@@ -13,6 +13,17 @@ GemAI is an Android application that provides a simple chat interface using Goog
 * Dark Mode support.
 * AI Prompt for user input.
 
+## Screenshots 📸
+
+<div align="center">
+
+<img alt="Screenshot" src="screenshots/GemAI_ApiKey.png" width="24%"/>
+<img alt="Screenshot" src="screenshots/GemAI_Startup.png" width="24%"/>
+<img alt="Screenshot" src="screenshots/GemAI_Chat.png" width="24%"/>
+<img alt="Screenshot" src="screenshots/GemAI_Chat2.png" width="24%"/>
+
+</div>
+
 
 ## Tech Stack 🛠️
 
