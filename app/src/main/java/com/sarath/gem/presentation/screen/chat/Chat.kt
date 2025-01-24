@@ -382,8 +382,8 @@ private fun Content(screenWidth: Int, state: ChatUIState, onActonEvent: (ChatUIA
             modifier = Modifier.weight(1f).fillMaxWidth(),
             targetState = state.chat.isNotEmpty(),
             label = "Chat Content",
-        ) { isEmpty ->
-            if (isEmpty) {
+        ) { isNotEmpty ->
+            if (isNotEmpty) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Bottom,
