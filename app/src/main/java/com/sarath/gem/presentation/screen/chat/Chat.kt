@@ -180,7 +180,7 @@ private fun Content(screenWidth: Int, state: ChatUIState, onActonEvent: (ChatUIA
     ) {
 
         // TODO: Fix the colors
-        val color = remember {
+        val color = remember(isDarkTheme) {
             if (isDarkTheme) {
                 DefaultMarkdownColors(
                     text = Color(0xFFE6E1E5), // Light gray text on dark background
@@ -205,7 +205,7 @@ private fun Content(screenWidth: Int, state: ChatUIState, onActonEvent: (ChatUIA
         }
 
         // TODO: Fix the typography
-        val typography = remember {
+        val typography = remember(isDarkTheme) {
             if (isDarkTheme) {
                 DefaultMarkdownTypography(
                     text =
