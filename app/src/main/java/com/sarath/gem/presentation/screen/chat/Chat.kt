@@ -1,14 +1,22 @@
 package com.sarath.gem.presentation.screen.chat
 
+import android.R.attr.label
+import android.text.TextUtils.isEmpty
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,6 +38,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowDownward
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -49,6 +58,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
@@ -62,6 +72,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.ai.client.generativeai.BuildConfig
 import com.mikepenz.markdown.model.DefaultMarkdownColors
 import com.mikepenz.markdown.model.DefaultMarkdownTypography
 import com.ramcosta.composedestinations.annotation.Destination
@@ -76,7 +87,9 @@ import com.sarath.gem.presentation.screen.chat.component.ChatStartup
 import com.sarath.gem.presentation.screen.chat.viewmodel.ChatUIAction
 import com.sarath.gem.presentation.screen.chat.viewmodel.ChatUIState
 import com.sarath.gem.presentation.screen.chat.viewmodel.ChatViewModel
+import com.sarath.gem.presentation.util.extension.scrollToBottom
 import kotlinx.coroutines.launch
+import java.lang.System.exit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Destination<ChatGraph>(start = true)
@@ -168,6 +181,7 @@ fun Chat(viewModel: ChatViewModel = hiltViewModel()) {
 @Composable
 private fun Content(screenWidth: Int, state: ChatUIState, onActonEvent: (ChatUIAction) -> Unit) {
 
+    val scope = rememberCoroutineScope()
     val chatBubbleFraction by remember { derivedStateOf { (screenWidth * 0.7).dp } }
 
     val lazyColumnState = rememberLazyListState()
@@ -180,7 +194,7 @@ private fun Content(screenWidth: Int, state: ChatUIState, onActonEvent: (ChatUIA
     ) {
 
         // TODO: Fix the colors
-        val color = remember {
+        val color = remember(isDarkTheme) {
             if (isDarkTheme) {
                 DefaultMarkdownColors(
                     text = Color(0xFFE6E1E5), // Light gray text on dark background
@@ -205,7 +219,7 @@ private fun Content(screenWidth: Int, state: ChatUIState, onActonEvent: (ChatUIA
         }
 
         // TODO: Fix the typography
-        val typography = remember {
+        val typography = remember(isDarkTheme) {
             if (isDarkTheme) {
                 DefaultMarkdownTypography(
                     text =
@@ -367,11 +381,12 @@ private fun Content(screenWidth: Int, state: ChatUIState, onActonEvent: (ChatUIA
             }
         }
 
+        //TODO: Improve the scrolling
         LaunchedEffect(state.chat) {
             if (state.chat.isNotEmpty() && lazyColumnState.firstVisibleItemIndex != state.chat.lastIndex) {
                 lazyColumnState.animateScrollToItem(state.chat.lastIndex)
             } else if (state.chat.isNotEmpty()) {
-                lazyColumnState.animateScrollBy(200f)
+                lazyColumnState.animateScrollBy(350f)
             }
         }
 
@@ -382,16 +397,21 @@ private fun Content(screenWidth: Int, state: ChatUIState, onActonEvent: (ChatUIA
             modifier = Modifier.weight(1f).fillMaxWidth(),
             targetState = state.chat.isNotEmpty(),
             label = "Chat Content",
-        ) { isEmpty ->
-            if (isEmpty) {
-                LazyColumn(
+        ) { isNotEmpty ->
+            if (isNotEmpty) {
+                Box(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Bottom,
-                    contentPadding = PaddingValues(vertical = 6.dp, horizontal = 2.dp),
-                    state = lazyColumnState,
+                    contentAlignment = Alignment.BottomCenter,
                 ) {
-                    items(items = state.chat, key = { it.id }) {
-                        val chatBubbleBackgroundColor by
+
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Bottom,
+                        contentPadding = PaddingValues(vertical = 6.dp, horizontal = 2.dp),
+                        state = lazyColumnState,
+                    ) {
+                        items(items = state.chat, key = { it.id }) {
+                            val chatBubbleBackgroundColor by
                             animateColorAsState(
                                 targetValue =
                                     when (it.participant) {
@@ -412,32 +432,85 @@ private fun Content(screenWidth: Int, state: ChatUIState, onActonEvent: (ChatUIA
                                 label = "sendBgColor",
                             )
 
-                        Row(
-                            modifier = Modifier.padding(5.dp).fillMaxWidth(),
-                            horizontalArrangement =
-                                if (it.participant == Participant.USER) Arrangement.End else Arrangement.Start,
-                        ) {
-                            ChatBubble(
-                                modifier =
-                                    Modifier.background(
+                            Row(
+                                modifier = Modifier.padding(5.dp).fillMaxWidth(),
+                                horizontalArrangement =
+                                    if (it.participant == Participant.USER) Arrangement.End else Arrangement.Start,
+                            ) {
+                                ChatBubble(
+                                    modifier =
+                                        Modifier.background(
                                             color = chatBubbleBackgroundColor,
                                             shape = MaterialTheme.shapes.medium,
                                         )
-                                        .then(
-                                            if (it.participant == Participant.USER)
-                                                Modifier.widthIn(max = chatBubbleFraction)
-                                            else Modifier
-                                        )
-                                        .padding(12.dp),
-                                content = it.content,
-                                participant = it.participant,
-                                color = color,
-                                typography = typography,
+                                            .then(
+                                                if (it.participant == Participant.USER)
+                                                    Modifier.widthIn(max = chatBubbleFraction)
+                                                else Modifier
+                                            )
+                                            .padding(12.dp),
+                                    content = it.content,
+                                    participant = it.participant,
+                                    color = color,
+                                    typography = typography,
+                                )
+                            }
+                        }
+
+                        item { Spacer(modifier = Modifier.height(10.dp)) }
+                    }
+
+                    val canScrollToBottom by remember {
+                        derivedStateOf {
+                            val layoutInfo = lazyColumnState.layoutInfo
+                            if (layoutInfo.totalItemsCount == 0 || layoutInfo.visibleItemsInfo.isEmpty()) return@derivedStateOf false
+
+                            val totalItemsCount = layoutInfo.totalItemsCount
+                            val lastItemIndex = totalItemsCount - 1
+
+                            val lastItem = layoutInfo.visibleItemsInfo.find { it.index == lastItemIndex }
+                            lastItem == null || lastItem.offset + lastItem.size > layoutInfo.viewportEndOffset
+                        }
+                    }
+
+
+
+                    // Sometimes i frkn hate compose devs for not fixing some bugs like this(fully qualified name)
+                    androidx.compose.animation.AnimatedVisibility(
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        visible = canScrollToBottom,
+                        enter = fadeIn(tween(650)),
+                        exit = fadeOut(tween(600)),
+                        label = "Scroll to bottom icon",
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .padding(bottom = 12.dp)
+                                .clip(MaterialTheme.shapes.medium)
+                                .clickable(enabled = canScrollToBottom) {
+                                    scope.launch {
+                                        lazyColumnState.scrollToBottom()
+                                    }
+                                }
+                                .border(
+                                width = 2.dp,
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                shape = MaterialTheme.shapes.medium,
+                            ).background(
+                                color = MaterialTheme.colorScheme.primaryContainer.copy(0.85f),
+                                shape = MaterialTheme.shapes.medium,
+                            )
+                                .padding(8.dp)
+                                ,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.ArrowDownward,
+                                contentDescription = "Scroll to bottom",
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
                             )
                         }
                     }
 
-                    item { Spacer(modifier = Modifier.height(10.dp)) }
                 }
             } else {
                 val startUps = remember(state.startupPrompts) { state.startupPrompts }
