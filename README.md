@@ -1,6 +1,6 @@
 # GemAI 🤖
 
-> A simple wrapper for Google Gemini AI, enabling easy integration for chat functionality.
+> A simple wrapper for Google Gemini AI, enabling basic chat functionality.
 
 ## Overview ℹ️
 
