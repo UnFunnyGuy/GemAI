@@ -12,4 +12,6 @@ sealed interface ChatUIAction : UIAction {
     data object Submit : ChatUIAction
 
     data object Clear : ChatUIAction
+
+    data class DeleteChat(val chatId:Long):ChatUIAction
 }

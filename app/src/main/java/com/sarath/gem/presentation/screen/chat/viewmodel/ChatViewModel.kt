@@ -1,12 +1,14 @@
 package com.sarath.gem.presentation.screen.chat.viewmodel
 
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sarath.gem.core.base.BaseViewModel
 import com.sarath.gem.domain.map
 import com.sarath.gem.domain.model.Conversation
 import com.sarath.gem.domain.model.Message
 import com.sarath.gem.domain.onSuccess
 import com.sarath.gem.domain.use_case.chat.CreateConversationUseCase
+import com.sarath.gem.domain.use_case.chat.DeleteChatUseCase
 import com.sarath.gem.domain.use_case.chat.GetConversationMessagesUseCase
 import com.sarath.gem.domain.use_case.chat.GetConversationsUseCase
 import com.sarath.gem.domain.use_case.chat.GetPromptsUseCase
@@ -34,6 +36,7 @@ constructor(
     private val getConversationsUseCase: GetConversationsUseCase,
     private val updateChatTitleUseCase: UpdateChatTitleUseCase,
     private val getPromptsUseCase: GetPromptsUseCase,
+    private val deleteChatUseCase: DeleteChatUseCase
 ) : BaseViewModel<ChatUIState, ChatUIEvent, ChatUIAction>() {
 
     private val currentChatId: MutableStateFlow<Long?> = MutableStateFlow(null)
@@ -79,6 +82,7 @@ constructor(
             is ChatUIAction.SetPrompt -> update { copy(prompt = action.prompt) }
             is ChatUIAction.SetChatId -> switchChat(chatId = action.chatId)
             ChatUIAction.CreateNewChat -> createNewChat()
+            is ChatUIAction.DeleteChat -> deleteChat(chatId = action.chatId)
         }
     }
 
@@ -86,6 +90,13 @@ constructor(
         if (currentState.chatId != chatId) {
             update { copy(chat = emptyList()) }
             currentChatId.value = chatId
+        }
+    }
+    private fun deleteChat(chatId:Long){
+        viewModelScope.launch {
+            deleteChatUseCase.perform(chatId).onSuccess {
+
+            }
         }
     }
 

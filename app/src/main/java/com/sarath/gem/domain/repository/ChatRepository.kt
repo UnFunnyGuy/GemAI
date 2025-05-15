@@ -15,6 +15,8 @@ interface ChatRepository {
 
     fun getConversations(): Flow<List<Conversation>>
 
+    suspend fun  deleteChat(chatId: Long): Result<Unit, RequestError>
+
     suspend fun getConversationById(id: Long): Result<Conversation, RequestError>
 
     fun getConversationMessages(conversationId: Long): Flow<List<Message>>
