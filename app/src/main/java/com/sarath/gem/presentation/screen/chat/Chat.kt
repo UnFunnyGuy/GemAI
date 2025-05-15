@@ -128,10 +128,13 @@ fun Chat(viewModel: ChatViewModel = hiltViewModel()) {
 
     SystemBarsColors(navigationBarColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp))
 
-    Box(modifier = Modifier.background(MaterialTheme.colorScheme.surface).fillMaxSize()) {
+    Box(modifier = Modifier
+        .background(MaterialTheme.colorScheme.surface)
+        .fillMaxSize()) {
         ChatSideNav(
             modifier =
-                Modifier.offset(x = drawerOffset)
+                Modifier
+                    .offset(x = drawerOffset)
                     .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
                     .fillMaxHeight()
                     .fillMaxWidth(fraction = 0.85f)
@@ -141,21 +144,27 @@ fun Chat(viewModel: ChatViewModel = hiltViewModel()) {
             drawerState = drawerState,
             onNewChat = { viewModel.onAction(ChatUIAction.CreateNewChat) },
             onSetChatId = { viewModel.onAction(ChatUIAction.SetChatId(it)) },
+            deleteChat = {viewModel.onAction(ChatUIAction.DeleteChat(it))}
         )
 
         Column(
             modifier =
-                Modifier.offset(x = animatedOffset).background(MaterialTheme.colorScheme.surface).clickable(
-                    enabled = drawerState.isOpen
-                ) {
-                    scope.launch { drawerState.close() }
-                },
+                Modifier
+                    .offset(x = animatedOffset)
+                    .background(MaterialTheme.colorScheme.surface)
+                    .clickable(
+                        enabled = drawerState.isOpen
+                    ) {
+                        scope.launch { drawerState.close() }
+                    },
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 IconButton(
-                    modifier = Modifier.align(Alignment.CenterStart).rotate(animateIcon),
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .rotate(animateIcon),
                     onClick = {
                         scope.launch {
                             if (drawerState.isClosed) {
@@ -394,7 +403,9 @@ private fun Content(screenWidth: Int, state: ChatUIState, onActonEvent: (ChatUIA
         val keyBoardController = LocalSoftwareKeyboardController.current
 
         AnimatedContent(
-            modifier = Modifier.weight(1f).fillMaxWidth(),
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
             targetState = state.chat.isNotEmpty(),
             label = "Chat Content",
         ) { isNotEmpty ->
@@ -433,16 +444,19 @@ private fun Content(screenWidth: Int, state: ChatUIState, onActonEvent: (ChatUIA
                             )
 
                             Row(
-                                modifier = Modifier.padding(5.dp).fillMaxWidth(),
+                                modifier = Modifier
+                                    .padding(5.dp)
+                                    .fillMaxWidth(),
                                 horizontalArrangement =
                                     if (it.participant == Participant.USER) Arrangement.End else Arrangement.Start,
                             ) {
                                 ChatBubble(
                                     modifier =
-                                        Modifier.background(
-                                            color = chatBubbleBackgroundColor,
-                                            shape = MaterialTheme.shapes.medium,
-                                        )
+                                        Modifier
+                                            .background(
+                                                color = chatBubbleBackgroundColor,
+                                                shape = MaterialTheme.shapes.medium,
+                                            )
                                             .then(
                                                 if (it.participant == Participant.USER)
                                                     Modifier.widthIn(max = chatBubbleFraction)
@@ -493,13 +507,14 @@ private fun Content(screenWidth: Int, state: ChatUIState, onActonEvent: (ChatUIA
                                     }
                                 }
                                 .border(
-                                width = 2.dp,
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                shape = MaterialTheme.shapes.medium,
-                            ).background(
-                                color = MaterialTheme.colorScheme.primaryContainer.copy(0.85f),
-                                shape = MaterialTheme.shapes.medium,
-                            )
+                                    width = 2.dp,
+                                    color = MaterialTheme.colorScheme.primaryContainer,
+                                    shape = MaterialTheme.shapes.medium,
+                                )
+                                .background(
+                                    color = MaterialTheme.colorScheme.primaryContainer.copy(0.85f),
+                                    shape = MaterialTheme.shapes.medium,
+                                )
                                 .padding(8.dp)
                                 ,
                         ) {
@@ -516,7 +531,9 @@ private fun Content(screenWidth: Int, state: ChatUIState, onActonEvent: (ChatUIA
                 val startUps = remember(state.startupPrompts) { state.startupPrompts }
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     ChatStartup(
-                        modifier = Modifier.align(Alignment.Center).fillMaxWidth(0.65f),
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .fillMaxWidth(0.65f),
                         startups = startUps,
                         onSelect = {
                             onActonEvent(ChatUIAction.SetPrompt(it))
@@ -529,10 +546,16 @@ private fun Content(screenWidth: Int, state: ChatUIState, onActonEvent: (ChatUIA
 
         ChatBottomSection(
             modifier =
-                Modifier.background(
+                Modifier
+                    .background(
                         color = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
                         shape =
-                            RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp, bottomStart = 0.dp, bottomEnd = 0.dp),
+                            RoundedCornerShape(
+                                topStart = 10.dp,
+                                topEnd = 10.dp,
+                                bottomStart = 0.dp,
+                                bottomEnd = 0.dp
+                            ),
                     )
                     .height(IntrinsicSize.Max)
                     .fillMaxWidth()
@@ -577,6 +600,9 @@ private fun ChatContentPreview() {
                     state = state.copy(prompt = it.prompt)
                 }
                 ChatUIAction.Submit -> {}
+                is ChatUIAction.DeleteChat -> {
+
+                }
             }
         },
     )

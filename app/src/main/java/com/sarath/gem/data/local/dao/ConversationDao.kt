@@ -16,6 +16,9 @@ interface ConversationDao : BaseDao<ConversationEntity> {
     @Query("UPDATE conversations SET title = :title WHERE id = :conversationId")
     suspend fun updateTitle(conversationId: Long, title: String)
 
+    @Query("DELETE FROM conversations WHERE id = :conversationId")
+    suspend fun deleteConversation(conversationId: Long)
+
     @Query("UPDATE conversations SET isUsedForPromptSuggestions = :isUsed WHERE id = :conversationId")
     suspend fun setUsedForPromptSuggestions(conversationId: Long, isUsed: Boolean)
 

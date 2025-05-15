@@ -59,6 +59,13 @@ constructor(
         return safeTry { conversationDao.getConversations().map { it.map { it.toDomain() } } } ?: emptyFlow()
     }
 
+    override suspend fun deleteChat(chatId: Long): Result<Unit, RequestError>{
+        return suspendedSafeTry {
+            conversationDao.deleteConversation(chatId)
+            Result.Success(Unit)
+        } ?: Result.Error(RequestError.Generic("Failed to delete conversation"))
+    }
+
     override suspend fun getConversationById(id: Long): Result<Conversation, RequestError> {
         TODO("Not yet implemented")
     }
